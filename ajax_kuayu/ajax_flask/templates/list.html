@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src={{ url_for('static', filename='jquery-1.12.4.js') }}></script>
+</head>
+
+<body>
+<h1>js-Ajax-jsonp</h1>
+<input type="button" onclick="XmlRequest1();" value="获取结果"/>
+<hr>
+<h1>jQuery -jsonp </h1>
+<input type="button" onclick="JqRequest1();" value="获取结果"/>
+
+
+<script>
+    function list(arg){
+        console.log(arg)
+    }
+
+    function XmlRequest1() {
+		var tag = document.createElement('script');
+		tag.src = 'http://www.jxntv.cn/data/jmd-jxtv2.html';
+		document.head.appendChild(tag);
+		document.head.removeChild(tag);
+    }
+
+    function JqRequest1() {
+        $.get({
+            url: 'http://www.jxntv.cn/data/jmd-jxtv2.html',
+            dataType: 'jsonp',
+            success: function (data, statusText, xmlHttpRequest) {
+				console.log(data)
+            }
+        })
+    }
+
+</script>
+
+</body>
+</html>

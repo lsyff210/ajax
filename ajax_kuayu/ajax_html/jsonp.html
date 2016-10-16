@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery-1.12.4.js"></script>
+</head>
+
+<body>
+<h1>js-Ajax-jsonp</h1>
+<input type="button" onclick="XmlRequest1();" value="获取结果"/>
+<hr>
+<h1>jQuery -jsonp </h1>
+<input type="button" onclick="JqRequest1();" value="获取结果"/>
+
+<h1>js-Ajax-jsonp-callback </h1>
+<input type="button" onclick="XmlRequest2();" value="获取结果"/>
+
+<h1>js-Ajax-跨域请求-响应头-简单请求 </h1>
+<input type="button" onclick="XmlRequest3();" value="获取结果"/>
+
+<h1>js-Ajax-跨域请求-响应头-非简单请求-cookie传输 </h1>
+<input type="button" onclick="XmlRequest4();" value="获取结果"/>
+
+<h1>jquery-Ajax-跨域请求-响应头-非简单请求-cookie传输 </h1>
+<input type="button" onclick="XmlRequest4();" value="获取结果"/>
+
+<script>
+    function XmlRequest1() {
+		var tag = document.createElement('script');
+		tag.src = 'http://127.0.0.1:8000/test4/';
+		document.head.appendChild(tag);
+		document.head.removeChild(tag);
+    }
+
+
+    function JqRequest1() {
+        $.get({
+            url: 'http://127.0.0.1:8000/test4/',
+            dataType: 'jsonp',
+            success: function (data, statusText, xmlHttpRequest) {
+				console.log(data)
+            }
+        })
+    }
+	
+	<!-- callback函数 -->
+    function XmlRequest2() {
+		var tag = document.createElement('script');
+		tag.src = 'http://127.0.0.1:8000/test5/?callback=call';
+		document.head.appendChild(tag);
+		document.head.removeChild(tag);
+    }	
+	
+	function call(arg){
+		console.log(arg)
+	}
+	
+    function XmlRequest3() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                var data = xhr.responseText;
+                console.log(data);
+            }
+
+        };
+        xhr.open('GET', 'http://127.0.0.1:8000/test6/', true);
+        xhr.send()
+    }	
+	
+	
+    function XmlRequest4() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                var data = xhr.responseText;
+                console.log(data);
+				console.log(xhr.getAllResponseHeaders());
+            }
+        };
+		xhr.withCredentials = true;
+        xhr.open('PUT', 'http://127.0.0.1:8000/test7/', true);
+		xhr.setRequestHeader('k1', 'ajax')
+        xhr.send()
+    }	
+	
+	    function JqRequest2() {
+        $.ajax({
+            url: 'http://127.0.0.1:8000/test7/',
+			type: 'PUT',
+            dataType: 'text',
+			headers: {"k1":"ajax", },
+			xhrFields: {withCredentials: true, },
+            success: function (data, statusText, xmlHttpRequest) {
+				console.log(data);
+            }
+        })
+    }
+		
+</script>
+
+</body>
+</html>

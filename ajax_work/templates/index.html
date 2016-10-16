@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+    <script src="/static/jquery-3.1.0.min.js"></script>
+    <style>
+        .search_div {
+            border: 1px solid #9ACCFB;
+            background-color: white;
+            text-align: left;
+        }
+
+        .search_li {
+            list-style: none;
+        }
+
+        .highlight {
+            background-color: burlywood;
+        }
+    </style>
+</head>
+
+<body>
+<form action="" style="margin-top: 30px;margin-bottom: 20px">
+    <input type="text" placeholder="请输入搜索内容" id="search_input" style="position: relative">
+    <input type="submit" value="搜索" id="search_submit">
+
+</form>
+<hr>
+
+
+<script>
+    $(function () {
+        var search_input = $('#search_input');
+        // 创建提示栏
+        var search_div = $('<div class="search_div"></div>', {display: 'none'});
+        search_div.insertAfter($('#search_submit'));
+        // 设计提示栏位置
+        var div_top = search_input.offset().top + 25;
+        var div_left = search_input.offset().left;
+        var div_width = String(parseInt(search_input.css('width')) + 10) + 'px';
+        // 监听input的input事件
+        search_input.bind('input', function () {
+            // 禁止浏览器的自动提示功能
+            search_input.attr("autocomplete", "off");
+            // input时获取value值
+            var search_value = search_input.val();
+            // 发送ajax请求，并将value值发送，以在数据库中匹配数据
+            $.post({
+                url: '/test1/',
+                data: {'search_value': search_value},
+                success: function (data, statusText, xmlHttpRequest) {
+                    console.log(data);
+                    if (data) {
+                        // 每次发送请求后都清空提示栏，以免出现重复提示
+                        search_div.empty();
+                        $.each(data, function (index, term) {
+                            // 添加具体提示信息
+                            var search_li = $('<li class="search_li"></li>');
+                            search_li.text(term).appendTo(search_div);
+                            // 鼠标放上去时，高亮显示，移开时取消
+                            search_li.hover(
+                                    function () {
+                                        $(this).addClass('highlight');
+                                    },
+                                    function () {
+                                        $(this).removeClass('highlight')
+                                    }
+                            );
+                            // 点下鼠标时确认提示值，并将值放入搜索框
+                            search_li.mousedown(function () {
+                                search_input.val(term);
+                                search_div.empty().hide();
+                            });
+                        });
+                        // 提示值全部就绪后，显示提示框
+                        search_div.css({display: 'block', top: div_top, left: div_left, width: div_width});
+                    }
+                },
+                dataType: 'json'
+            })
+
+        });
+
+        // 创建函数，通过提示栏中li的索引值index处理上下键移动时提示值的选择
+        var select_li = function (select_index, select_length) {
+            var div_li = search_div.find('li');
+            // 索引值大于提示选项个数时，返回到第一个提示值（向下移动）
+            // 小于0时，返回到最后一个值（针对向上移动）
+            if (select_index >= select_length) {
+                select_index = 0;
+            } else if (select_index < 0) {
+                select_index = select_length - 1
+            }
+            // 对选中的选项进行高亮处理
+            div_li.eq(select_index).addClass('highlight');
+        };
+
+        // 监听input中的按键事件
+        search_input.keydown(function (event) {
+            // 查找当前选中项
+            var class_search = $('.highlight');
+            // 查找提示栏提示值个数
+            var li_length = search_div.find('li').length;
+            // 当前选中项的索引值
+            var li_index = class_search.index();
+            // 按键向上时，如果有选中项，则选择上一个， index-1
+            // 如果没有选中项，直接选中最后一个值
+            if (event.keyCode == 38) {
+                if (class_search.length > 0) {
+                    class_search.removeClass('highlight');
+                    select_li(li_index - 1, li_length);
+                } else {
+                    select_li(li_length - 1, li_length);
+                }
+            } else if (event.keyCode == 40) {
+            // 按键向下时，如果有选中项，则选下一个， index+1
+            // 如果没有选中项，直接选中第一个值
+                if (class_search.length > 0) {
+                    class_search.removeClass('highlight');
+                    select_li(li_index + 1, li_length);
+                } else {
+                    select_li(0, li_length);
+                }
+            } else if (event.keyCode == 13) {
+                // 按下enter键时，将选中项的提示值放到搜索框中，并且清空和隐藏提示栏
+                search_input.val(class_search.text());
+                search_div.empty();
+                search_div.css({display: 'none'});
+                // 为了防止enter引发表单提交，必须阻止浏览器默认的提交事件，
+                // 这里不能用keyup，为了统一， 所有键盘事件全部选用keydown
+                event.preventDefault();
+            }
+        });
+
+        // 鼠标离开搜索框时，清空和隐藏提示栏
+        search_input.bind('blur', function () {
+            search_div.empty();
+            search_div.css({display: 'none'});
+        });
+
+
+    });
+
+
+    $(function () {
+        alert('ajax test')
+    });
+
+
+</script>
+
+</body>
+</html>
